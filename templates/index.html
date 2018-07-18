@@ -38,7 +38,7 @@
 
             //check if current user is logged in or not, if logged in, hide login content, display logout content
             //If the user is not logged in, display login content and hide logout content
-            var login_status = document.getElementById("login_status").innerHTML;
+            var login_status = document.querySelector('#login_status').innerHTML;
 
             if (login_status == 'Yes') {
                 document.querySelector('#login_form').style.visibility = "hidden";
@@ -46,6 +46,12 @@
             } else if (login_status == 'No') {
                 document.querySelector('#login_form').style.visibility = "visible";
                 document.querySelector('#logout_form').style.visibility = "hidden";
+            }
+
+            var login_error = document.querySelector('#login_error').innerHTML
+            console.log(login_error);
+            if (login_error == 'Yes') {
+                alert("That username already exist");
             }
         });
         </script>
@@ -78,6 +84,7 @@
                     </div>
                 </div>
                 <p id="login_status" style="display: none;">{{ login_status }}</p>
+                <p id="login_error" style="display: none;">{{ login_error }}</p>
             </div>
             <div>
                 Yes Votes: <span id="yes">{{ votes[0] }}</span>
