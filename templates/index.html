@@ -20,12 +20,7 @@
                     socket.emit('update channel', {'channelname': channelname});
                 }
 
-                // Each button should emit a "submit vote" event
-                document.querySelector('#channel_delete').onclick = () => {
-                    const channelname = document.querySelector('#channelname').value;
-                    console.log(channelname);
-                    socket.emit('delete channel', {'channelname': channelname});
-                }
+
             });
 
             // When a new vote is announced, increase the count
@@ -35,6 +30,7 @@
                 // Create new channel.
                 const post = document.createElement('div');
                 post.className = 'channel';
+                post.value = data[whatisthis-1];
                 post.innerHTML = data[whatisthis-1];
 
                 // Create remove button.
@@ -44,7 +40,11 @@
                 post.append(remove);
 
                 remove.onclick = function() {
+                    const asd = this.parentElement.value;
                     this.parentElement.remove();
+                    const channelname = this.parentElement.value;
+                    socket.emit('delete channel', {'channelname': channelname});
+
                 }
 
                 // Add post to DOM.
