@@ -4,6 +4,7 @@ import requests
 from flask import Flask, session, jsonify, render_template, request, redirect, url_for
 from flask_session import Session
 from flask_socketio import SocketIO, emit
+from chat import newChat
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -17,6 +18,8 @@ Session(app)
 # list of all channels
 channels = []
 
+chats = []
+
 # list of usernames
 users = []
 
@@ -26,6 +29,15 @@ votes = ["what"]
 def index():
     username = session.get('user')
     print("list of users (1): " + str(users))
+    asd = newChat('testing', 'admin', 'Hi!', 'Today')
+    print(asd)
+    print(asd.channel)
+    print(asd.time)
+    chats.append(asd)
+    print(chats)
+    print(chats[0])
+    print(chats[0].user)
+    #print([d['channel'] for d in chats])
     if username:
         login_status = "Yes"
         return render_template("index.html", username=username, login_status=login_status, channels=channels)

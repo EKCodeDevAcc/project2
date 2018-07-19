@@ -116,7 +116,7 @@
             <hr>
             <div id="received">
                 {% for channel in channels %}
-                <div class="channel" value="{{ channel }}">{{ channel }}<button id="remove{{ channel }}" onclick="removeOld(`{{ channel }}`, this.parentNode)">Remove</button></div>
+                <div class="channel" value="{{ channel }}">{{ channel }}<button onclick="removeOld(`{{ channel }}`, this.parentNode)">Remove</button></div>
                 {% endfor %}
             </div>
             <div style="display: none;">
