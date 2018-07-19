@@ -10,6 +10,8 @@
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
+            console.log(socket);
+
             // When connected, configure buttons
             socket.on('connect', () => {
 
@@ -19,43 +21,32 @@
                     console.log(channelname);
                     socket.emit('update channel', {'channelname': channelname});
                 }
-
-
             });
 
             // When a new vote is announced, increase the count
             socket.on('channel updated', data => {
-                const whatisthis = Object.keys(data).length;
+                const channelLength = Object.keys(data).length;
 
                 // Create new channel.
                 const post = document.createElement('div');
                 post.className = 'channel';
-                post.value = data[whatisthis-1];
-                post.innerHTML = data[whatisthis-1];
+                post.value = data[channelLength-1];
+                post.innerHTML = data[channelLength-1];
 
                 // Create remove button.
                 const remove = document.createElement('button');
-                remove.className = 'remove';
                 remove.innerHTML = 'Remove';
                 post.append(remove);
 
                 remove.onclick = function() {
-                    const asd = this.parentElement.value;
                     this.parentElement.remove();
                     const channelname = this.parentElement.value;
+                    console.log(channelname);
                     socket.emit('delete channel', {'channelname': channelname});
-
                 }
 
                 // Add post to DOM.
                 document.querySelector('#received').append(post);
-            });
-
-            // When a new vote is announced, increase the count
-            socket.on('delete channel', data => {
-                console.log(data);
-                document.querySelector('#testtest').innerHTML = data;
-                console.log(document.querySelector('#testtest').innerHTML);
             });
 
             //check if current user is logged in or not, if logged in, hide login content, display logout content
@@ -70,6 +61,14 @@
                 document.querySelector('#logout_form').style.visibility = "hidden";
             };
         });
+
+        //Data is name of channel, and element is parent element
+        function removeOld(data, element){
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            element.remove();
+            socket.emit('delete channel', {'channelname': data});
+        };
+
         </script>
         <title>Vote</title>
     </head>
@@ -109,13 +108,6 @@
                     <button id="channel_submit" class="btn btn-primary">Create</button>
                 </div>
             </div>
-            <div id="channel_form">
-                <!-- Subtitle of main page -->
-                <div id="subtitle_center2" class="form-group">
-                    <input type="text" id="sad" name="channelname" placeholder="channelname">
-                    <button id="channel_delete" class="btn btn-primary">Create</button>
-                </div>
-            </div>
             <hr>
             <div>
                 <input type="text" id="message">
@@ -124,8 +116,11 @@
             <hr>
             <div id="received">
                 {% for channel in channels %}
-                <div>{{ channel }}<button class="remove">Remove</button></div>
+                <div class="channel" value="{{ channel }}">{{ channel }}<button id="remove{{ channel }}" onclick="removeOld(`{{ channel }}`, this.parentNode)">Remove</button></div>
                 {% endfor %}
+            </div>
+            <div style="display: none;">
+                <button id="remove"></button>
             </div>
         </div>
     </body>

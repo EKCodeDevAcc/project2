@@ -60,7 +60,6 @@ def channel(data):
     channelname = data["channelname"]
     print(channelname)
     channels.append(channelname)
-    channels_len = len(channels)
     print(channels)
     emit("channel updated", channels, broadcast=True)
 
