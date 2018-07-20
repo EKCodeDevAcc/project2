@@ -119,3 +119,21 @@
 body {
     background-color: #e6e6e6;
 }
+
+.selected_time {
+    display: block;
+    width: 30%;
+    float: left;
+}
+
+.selected_user {
+    display: block;
+    width: 20%;
+    float: left;
+}
+
+.selected_message {
+    display: block;
+    width: 50%;
+    float: left;
+}

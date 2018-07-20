@@ -30,14 +30,16 @@ votes = ["what"]
 @app.route("/")
 def index():
     username = session.get('user')
-    print("list of users (1): " + str(users))
+    print(channels)
+    print(chats)
+    print(type(chats))
     if username:
         login_status = "Yes"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats)
     else:
         username = "blank"
         login_status = "No"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats)
 
 
 #Get input value from login.html and check if given username/password exist in db.
@@ -90,15 +92,16 @@ def chat(data):
     chattime = datetime.datetime.now()
     print(chattime)
 
-    addChat = "{\"channel\": \"Testing\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
-    print(addChat)
+    jsChat = "{\"channel\": \"Testing\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
+    #print(addChat)
 
-    chats.append(addChat);
-    print(chats)
-    print(chats[0])
+    dictChat = dict(channel="Testing", user=username, message=chatname, time=str(chattime))
+
+    chats.append(dictChat);
+
     #print(chats[0].channel)
 
-    emit("chat updated", chats, broadcast=True)
+    emit("chat updated", jsChat, broadcast=True)
 
     # addChat = newChat('Testing', username, chatname, chattime)
 

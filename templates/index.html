@@ -57,14 +57,26 @@
 
             // When a new vote is announced, increase the count
             socket.on('chat updated', data => {
-                console.log(data);
-                console.log(typeof data);
-                console.log(typeof data[0]);
-                var asd = JSON.parse(data[0]);
-                console.log(asd);
-                console.log(typeof asd);
-                console.log(asd.message);
-                console.log(asd[0])
+                const info = JSON.parse(data);
+
+                const selected_time = document.createElement('div');
+                selected_time.className = 'selected_time';
+                selected_time.value = info.time;
+                selected_time.innerHTML = info.time;
+
+                const selected_user = document.createElement('div');
+                selected_user.className = 'selected_user';
+                selected_user.value = info.user;
+                selected_user.innerHTML = info.user;
+
+                const selected_message = document.createElement('div');
+                selected_message.className = 'selected_message';
+                selected_message.value = info.message;
+                selected_message.innerHTML = info.message;
+
+                document.querySelector('#chat_list').append(selected_time);
+                document.querySelector('#chat_list').append(selected_user);
+                document.querySelector('#chat_list').append(selected_message);
             });
 
 
@@ -138,6 +150,16 @@
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
+                </div>
+                <div>
+                    {% for chat in chats %}
+                    <div class="selected_time" value="{{ chat.time }}">{{ chat.time }}</div>
+                    <div class="selected_user" value="{{ chat.user }}">{{ chat.user }}</div>
+                    <div class="selected_message" value="{{ chat.message }}">{{ chat.message }}</div>
+                    {% endfor %}
+                    <div id="chat_list">
+
+                    </div>
                 </div>
             </div>
             <div style="display: none;">
