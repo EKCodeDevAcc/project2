@@ -1,5 +1,7 @@
 import os
 import requests
+import datetime
+import json
 
 from flask import Flask, session, jsonify, render_template, request, redirect, url_for
 from flask_session import Session
@@ -29,15 +31,6 @@ votes = ["what"]
 def index():
     username = session.get('user')
     print("list of users (1): " + str(users))
-    asd = newChat('testing', 'admin', 'Hi!', 'Today')
-    print(asd)
-    print(asd.channel)
-    print(asd.time)
-    chats.append(asd)
-    print(chats)
-    print(chats[0])
-    print(chats[0].user)
-    #print([d['channel'] for d in chats])
     if username:
         login_status = "Yes"
         return render_template("index.html", username=username, login_status=login_status, channels=channels)
@@ -83,3 +76,42 @@ def deleteChannel(data):
     channels.remove(channelname)
     print(channels)
     emit("channel deleted", channels, broadcast=True)
+
+
+@socketio.on("update chat")
+def chat(data):
+
+    username = session.get('user')
+    print(username)
+
+    chatname = data["chat"]
+    print(chatname)
+
+    chattime = datetime.datetime.now()
+    print(chattime)
+
+    addChat = "{\"channel\": \"Testing\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
+    print(addChat)
+
+    chats.append(addChat);
+    print(chats)
+    print(chats[0])
+    #print(chats[0].channel)
+
+    emit("chat updated", chats, broadcast=True)
+
+    # addChat = newChat('Testing', username, chatname, chattime)
+
+    # chats.append(addChat)
+    # print(chats)
+    # print(chats[0].channel)
+    # print(chats[0].user)
+    # print(chats[0].message)
+    # print(chats[0].time)
+
+    #testJson = json.dumps(addChat)
+    # testJson = json.dumps(addChat, indent=4, sort_keys=True, default=str)
+    # print("1: " + testJson)
+    # print("2: " + testJson[0])
+
+    #emit("chat updated", testJson, broadcast=True)

@@ -1,3 +1,5 @@
+import json
+
 class Chat:
     channel = ""
     user = ""
@@ -9,6 +11,10 @@ class Chat:
         self.user = user
         self.message = message
         self.time = time
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+            sort_keys=True, indent=4)
 
 def newChat(channel, user, message, time):
     chat = Chat(channel, user, message, time)

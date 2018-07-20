@@ -10,8 +10,6 @@
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
-            console.log(socket);
-
             // When connected, configure buttons
             socket.on('connect', () => {
 
@@ -21,12 +19,19 @@
                     console.log(channelname);
                     socket.emit('update channel', {'channelname': channelname});
                 }
+
+                // Each button should emit a "submit vote" event
+                document.querySelector('#chat_submit').onclick = () => {
+                    const chat = document.querySelector('#message').value;
+                    console.log(chat);
+                    socket.emit('update chat', {'chat': chat});
+                }
             });
+
 
             // When a new vote is announced, increase the count
             socket.on('channel updated', data => {
                 const channelLength = Object.keys(data).length;
-
                 // Create new channel.
                 const post = document.createElement('div');
                 post.className = 'channel';
@@ -35,24 +40,37 @@
 
                 // Create remove button.
                 const remove = document.createElement('button');
+                remove.className = 'btn btn-outline-danger';
                 remove.innerHTML = 'Remove';
+                remove.style = 'float:right;';
                 post.append(remove);
-
                 remove.onclick = function() {
                     this.parentElement.remove();
                     const channelname = this.parentElement.value;
                     console.log(channelname);
                     socket.emit('delete channel', {'channelname': channelname});
                 }
-
                 // Add post to DOM.
-                document.querySelector('#received').append(post);
+                document.querySelector('#channel_list').append(post);
             });
+
+
+            // When a new vote is announced, increase the count
+            socket.on('chat updated', data => {
+                console.log(data);
+                console.log(typeof data);
+                console.log(typeof data[0]);
+                var asd = JSON.parse(data[0]);
+                console.log(asd);
+                console.log(typeof asd);
+                console.log(asd.message);
+                console.log(asd[0])
+            });
+
 
             //check if current user is logged in or not, if logged in, hide login content, display logout content
             //If the user is not logged in, display login content and hide logout content
             var login_status = document.querySelector('#login_status').innerHTML;
-
             if (login_status == 'Yes') {
                 document.querySelector('#login_form').style.visibility = "hidden";
                 document.querySelector('#logout_form').style.visibility = "visible";
@@ -61,14 +79,12 @@
                 document.querySelector('#logout_form').style.visibility = "hidden";
             };
         });
-
         //Data is name of channel, and element is parent element
         function removeOld(data, element){
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
             element.remove();
             socket.emit('delete channel', {'channelname': data});
         };
-
         </script>
         <title>Vote</title>
     </head>
@@ -101,23 +117,28 @@
                 <p id="login_status" style="display: none;">{{ login_status }}</p>
                 <p id="login_error" style="display: none;">{{ login_error }}</p>
             </div>
-            <div id="channel_form">
-                <!-- Subtitle of main page -->
-                <div id="subtitle_center2" class="form-group">
-                    <input type="text" id="channelname" name="channelname" placeholder="channelname">
-                    <button id="channel_submit" class="btn btn-primary">Create</button>
+            <hr>
+            <div id="channel_box">
+                <div id="channel_form">
+                    <!-- Subtitle of main page -->
+                    <div id="subtitle_center2" class="form-group">
+                        <input type="text" id="channelname" name="channelname" placeholder="channelname">
+                        <button id="channel_submit" class="btn btn-success">Create</button>
+                    </div>
+                </div>
+                <div id="channel_list">
+                    {% for channel in channels %}
+                    <div class="channel" value="{{ channel }}">{{ channel }}
+                        <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
+                    </div>
+                    {% endfor %}
                 </div>
             </div>
-            <hr>
-            <div>
-                <input type="text" id="message">
-                <button id="chatSend" data-vote="yes">Send</button>
-            </div>
-            <hr>
-            <div id="received">
-                {% for channel in channels %}
-                <div class="channel" value="{{ channel }}">{{ channel }}<button onclick="removeOld(`{{ channel }}`, this.parentNode)">Remove</button></div>
-                {% endfor %}
+            <div id="chat_box">
+                <div id="subtitle_center2" class="form-group">
+                    <input type="text" id="message">
+                    <button id="chat_submit" class="btn btn-primary">Send</button>
+                </div>
             </div>
             <div style="display: none;">
                 <button id="remove"></button>
