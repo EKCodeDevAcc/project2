@@ -7,6 +7,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <script>
         document.addEventListener('DOMContentLoaded', () => {
+
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
@@ -57,26 +58,33 @@
 
             // When a new vote is announced, increase the count
             socket.on('chat updated', data => {
+
+                var login_status = document.querySelector('#current_channel').innerHTML;
+                console.log("current: " + login_status);
+
                 const info = JSON.parse(data);
 
-                const selected_time = document.createElement('div');
-                selected_time.className = 'selected_time';
-                selected_time.value = info.time;
-                selected_time.innerHTML = info.time;
+                if (info.channel == login_status){
 
-                const selected_user = document.createElement('div');
-                selected_user.className = 'selected_user';
-                selected_user.value = info.user;
-                selected_user.innerHTML = info.user;
+                    const selected_time = document.createElement('div');
+                    selected_time.className = 'selected_time';
+                    selected_time.value = info.time;
+                    selected_time.innerHTML = info.time;
 
-                const selected_message = document.createElement('div');
-                selected_message.className = 'selected_message';
-                selected_message.value = info.message;
-                selected_message.innerHTML = info.message;
+                    const selected_user = document.createElement('div');
+                    selected_user.className = 'selected_user';
+                    selected_user.value = info.user;
+                    selected_user.innerHTML = info.user;
 
-                document.querySelector('#chat_list').append(selected_time);
-                document.querySelector('#chat_list').append(selected_user);
-                document.querySelector('#chat_list').append(selected_message);
+                    const selected_message = document.createElement('div');
+                    selected_message.className = 'selected_message';
+                    selected_message.value = info.message;
+                    selected_message.innerHTML = info.message;
+
+                    document.querySelector('#chat_list').append(selected_time);
+                    document.querySelector('#chat_list').append(selected_user);
+                    document.querySelector('#chat_list').append(selected_message);
+                }
             });
 
 
@@ -128,6 +136,7 @@
                 </div>
                 <p id="login_status" style="display: none;">{{ login_status }}</p>
                 <p id="login_error" style="display: none;">{{ login_error }}</p>
+                <p id="current_channel" style="display: none;">{{ channelname }}</p>
             </div>
             <hr>
             <div id="channel_box">

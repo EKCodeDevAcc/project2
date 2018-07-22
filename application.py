@@ -124,8 +124,6 @@ def chat(data):
 
     chats.append(dictChat);
 
-    foodict = {k: v for k, v in dictChat.items() if k.startswith('foo')}
-
     #print(chats[0].channel)
 
     emit("chat updated", jsChat, broadcast=True)
