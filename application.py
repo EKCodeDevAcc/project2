@@ -21,6 +21,7 @@ Session(app)
 channels = []
 
 chats = []
+choosenChats = []
 
 # list of usernames
 users = []
@@ -30,16 +31,17 @@ votes = ["what"]
 @app.route("/")
 def index():
     username = session.get('user')
-    print(channels)
-    print(chats)
-    print(type(chats))
+    channelname = session.get('channel')
+
+    print(len(chats))
+
     if username:
         login_status = "Yes"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats, channelname=channelname)
     else:
         username = "blank"
         login_status = "No"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats, channelname=channelname)
 
 
 #Get input value from login.html and check if given username/password exist in db.
@@ -60,6 +62,24 @@ def loginPost():
 def logout():
     session.pop('user', None)
     return redirect('/')
+
+
+#Get input value from login.html and check if given username/password exist in db.
+@app.route("/channelSelectPost", methods=['POST'])
+def channelSelectPost():
+    session.pop('channel', None)
+    channelname = request.form.get("hiddenChannel")
+    #users.append(username)
+    session['channel'] = channelname
+    print("channelname: " + str(channelname))
+    print(session['channel'])
+    login_status = "Yes"
+    login_error = "No"
+    username = session.get('user')
+    #print("list of users (2): " + str(users))
+    #print("login status: " + login_status)
+    return redirect(url_for('index', username=username, login_status=login_status, channels=channels, channelname=channelname))
+
 
 
 @socketio.on("update channel")
@@ -83,6 +103,9 @@ def deleteChannel(data):
 @socketio.on("update chat")
 def chat(data):
 
+    channelname = session.get('channel')
+    print(channelname)
+
     username = session.get('user')
     print(username)
 
@@ -92,12 +115,14 @@ def chat(data):
     chattime = datetime.datetime.now()
     print(chattime)
 
-    jsChat = "{\"channel\": \"Testing\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
+    jsChat = "{\"channel\": \"" + channelname + "\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
     #print(addChat)
 
-    dictChat = dict(channel="Testing", user=username, message=chatname, time=str(chattime))
+    dictChat = dict(channel=channelname, user=username, message=chatname, time=str(chattime))
 
     chats.append(dictChat);
+
+    foodict = {k: v for k, v in dictChat.items() if k.startswith('foo')}
 
     #print(chats[0].channel)
 

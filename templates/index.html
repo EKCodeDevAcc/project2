@@ -140,13 +140,18 @@
                 </div>
                 <div id="channel_list">
                     {% for channel in channels %}
-                    <div class="channel" value="{{ channel }}">{{ channel }}
-                        <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
-                    </div>
+                    <form action="{{ url_for('channelSelectPost') }}" method="post">
+                        <div class="channel" name="channel" value="{{ channel }}">{{ channel }}
+                            <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
+                            <button class="btn btn-primary">Select</button>
+                            <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
+                        </div>
+                    </form>
                     {% endfor %}
                 </div>
             </div>
             <div id="chat_box">
+                <h2>Current Channel: {{ channelname }}</h2>
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
