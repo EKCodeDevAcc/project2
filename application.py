@@ -33,15 +33,17 @@ def index():
     username = session.get('user')
     channelname = session.get('channel')
 
-    print(len(chats))
+    keyVal = [channelname]
+    choosenChats = [d for d in chats if d['channel'] in keyVal]
+    print("NewNew: " + str(choosenChats))
 
     if username:
         login_status = "Yes"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats, channelname=channelname)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, choosenChats=choosenChats, channelname=channelname)
     else:
         username = "blank"
         login_status = "No"
-        return render_template("index.html", username=username, login_status=login_status, channels=channels, chats=chats, channelname=channelname)
+        return render_template("index.html", username=username, login_status=login_status, channels=channels, choosenChats=choosenChats, channelname=channelname)
 
 
 #Get input value from login.html and check if given username/password exist in db.
