@@ -33,6 +33,8 @@ def index():
     username = session.get('user')
     channelname = session.get('channel')
 
+    print("/ channelname: " + str(channelname))
+
     keyVal = [channelname]
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     # print("NewNew: " + str(choosenChats))
@@ -94,14 +96,16 @@ def channel(data):
 
 
 #working on this part
-@socketio.on("switch channel")
-def switchChannel(data):
-    session.pop('channel', None)
-    channelname = data["channelname"]
-    print("get switch channel name: " + str(channelname))
-    session['channel'] = channelname
-    print("session: " + str(session['channel']))
-    emit("channel switched", channelname, broadcast=True)
+# @socketio.on("switch channel")
+# def switchChannel(data):
+#     session.pop('channel', None)
+#     channelname = data["channelname"]
+#     print("get switch channel name: " + str(channelname))
+
+#     session['channel'] = channelname
+
+#     print("session: " + str(session['channel']))
+#     emit("channel switched", channelname, broadcast=True)
 
 
 @socketio.on("delete channel")

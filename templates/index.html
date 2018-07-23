@@ -8,6 +8,16 @@
         <script>
         document.addEventListener('DOMContentLoaded', () => {
 
+            /*if (typeof(Storage) !== "undefined") {
+                // Store
+                localStorage.setItem("last_channel", "Smith");
+                // Retrieve
+                //document.getElementById("result").innerHTML = localStorage.getItem("lastname");
+            } else {
+                //document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+            }
+*/
+
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
 
@@ -78,11 +88,11 @@
 
 
             // When select new channel, change channel session
-            socket.on('channel switched', data => {
+            /*socket.on('channel switched', data => {
                 document.querySelector('#current_channel_title').innerHTML = data;
                 document.querySelector('#current_channel').innerHTML = data;
                 console.log("here here " + data);
-            });
+            });*/
 
 
             // When a new vote is announced, increase the count
@@ -129,12 +139,12 @@
             };
         });
 
-        function switchChannel(data){
+        /*function switchChannel(data){
             console.log("switch Clicked!");
             console.log(data);
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
             socket.emit('switch channel', {'channelname': data});
-        }
+        }*/
 
         //Data is name of channel, and element is parent element
         function removeOld(data, element){
@@ -186,19 +196,18 @@
                 </div>
                 <div id="channel_list">
                     {% for channel in channels %}
-                    <!--
-                    <form action="{{ url_for('channelSelectPost') }}" method="post">-->
+                    <form action="{{ url_for('channelSelectPost') }}" method="post">
                         <div class="channel">
                             <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
-                            <button class="btn btn-link" onclick="switchChannel(`{{ channel }}`)">{{ channel }}</button>
+                            <button class="btn btn-link">{{ channel }}</button>
                             <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
                         </div>
-                    <!--</form>-->
+                    </form>
                     {% endfor %}
                 </div>
             </div>
             <div id="chat_box">
-                <h2>Current Channel: <span id="current_channel_title">{{ channelname }}</span></h2>
+                <h2>Current Channel: {{ channelname }}</h2>
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
