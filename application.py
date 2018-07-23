@@ -37,7 +37,24 @@ def index():
 
     keyVal = [channelname]
     choosenChats = [d for d in chats if d['channel'] in keyVal]
-    # print("NewNew: " + str(choosenChats))
+    numChoosen = len(choosenChats)
+
+    if numChoosen > 0:
+        print("choosenChats: " + str(choosenChats[0]["time"]))
+        print("numChoosen: " + str(numChoosen))
+
+    # if numChoosen > 5:
+    #     for idx, val in enumerate(choosenChats):
+    # print(idx, val)
+
+
+    if numChoosen > 5:
+        for i in range(numChoosen-5):
+            # choosenChats.remove(choosenChats[i]["time"])
+            choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
+            # chats = [d for d in chats if d['time'] != choosenChats[i]["time"]]
+            print("for loop choosen: " + str(choosenChats))
+
 
     if username:
         login_status = "Yes"
