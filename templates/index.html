@@ -33,26 +33,55 @@
             // When a new vote is announced, increase the count
             socket.on('channel updated', data => {
                 const channelLength = Object.keys(data).length;
+
+                // Create form
+                const newForm = document.createElement('form');
+                newForm.action = '/channelSelectPost'
+                newForm.method = 'post';
+
                 // Create new channel.
-                const post = document.createElement('div');
-                post.className = 'channel';
-                post.value = data[channelLength-1];
-                post.innerHTML = data[channelLength-1];
+                const newDiv = document.createElement('div');
+                newDiv.className = 'channel';
+                newDiv.value = data[channelLength-1];
+                newForm.append(newDiv);
+
+                // Create hidden input.
+                const hiddenInput = document.createElement('input');
+                hiddenInput.setAttribute('type', 'text');
+                hiddenInput.className = 'hiddenChannel';
+                hiddenInput.setAttribute('value', data[channelLength-1]);
+                hiddenInput.style = 'display: none;';
+                newDiv.append(hiddenInput);
+
+                // Create submit button.
+                const newSubmit = document.createElement('button');
+                newSubmit.className = 'btn btn-link';
+                newSubmit.innerHTML = data[channelLength-1];
+                newDiv.append(newSubmit);
 
                 // Create remove button.
-                const remove = document.createElement('button');
-                remove.className = 'btn btn-outline-danger';
-                remove.innerHTML = 'Remove';
-                remove.style = 'float:right;';
-                post.append(remove);
+                const newRemove = document.createElement('button');
+                newRemove.className = 'btn btn-outline-danger';
+                newRemove.setAttribute('onclick', 'removeOld(\'' + data[channelLength-1] + '\', this.parentNode)');
+                newRemove.innerHTML = 'Remove';
+                newRemove.style = 'float:right;';
+                newDiv.append(newRemove);
                 remove.onclick = function() {
                     this.parentElement.remove();
                     const channelname = this.parentElement.value;
-                    console.log(channelname);
                     socket.emit('delete channel', {'channelname': channelname});
                 }
+
                 // Add post to DOM.
-                document.querySelector('#channel_list').append(post);
+                document.querySelector('#channel_list').append(newForm);
+            });
+
+
+            // When select new channel, change channel session
+            socket.on('channel switched', data => {
+                document.querySelector('#current_channel_title').innerHTML = data;
+                document.querySelector('#current_channel').innerHTML = data;
+                console.log("here here " + data);
             });
 
 
@@ -99,6 +128,14 @@
                 document.querySelector('#logout_form').style.visibility = "hidden";
             };
         });
+
+        function switchChannel(data){
+            console.log("switch Clicked!");
+            console.log(data);
+            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+            socket.emit('switch channel', {'channelname': data});
+        }
+
         //Data is name of channel, and element is parent element
         function removeOld(data, element){
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -149,18 +186,19 @@
                 </div>
                 <div id="channel_list">
                     {% for channel in channels %}
-                    <form action="{{ url_for('channelSelectPost') }}" method="post">
-                        <div class="channel" name="channel" value="{{ channel }}">{{ channel }}
+                    <!--
+                    <form action="{{ url_for('channelSelectPost') }}" method="post">-->
+                        <div class="channel">
                             <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
-                            <button class="btn btn-primary">Select</button>
+                            <button class="btn btn-link" onclick="switchChannel(`{{ channel }}`)">{{ channel }}</button>
                             <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
                         </div>
-                    </form>
+                    <!--</form>-->
                     {% endfor %}
                 </div>
             </div>
             <div id="chat_box">
-                <h2>Current Channel: {{ channelname }}</h2>
+                <h2>Current Channel: <span id="current_channel_title">{{ channelname }}</span></h2>
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>

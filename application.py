@@ -35,7 +35,7 @@ def index():
 
     keyVal = [channelname]
     choosenChats = [d for d in chats if d['channel'] in keyVal]
-    print("NewNew: " + str(choosenChats))
+    # print("NewNew: " + str(choosenChats))
 
     if username:
         login_status = "Yes"
@@ -73,8 +73,8 @@ def channelSelectPost():
     channelname = request.form.get("hiddenChannel")
     #users.append(username)
     session['channel'] = channelname
-    print("channelname: " + str(channelname))
-    print(session['channel'])
+    print("post channelname: " + str(channelname))
+    print("post channel session: " + str(session['channel']))
     login_status = "Yes"
     login_error = "No"
     username = session.get('user')
@@ -87,18 +87,30 @@ def channelSelectPost():
 @socketio.on("update channel")
 def channel(data):
     channelname = data["channelname"]
-    print(channelname)
+    print("socket: " + str(channelname))
     channels.append(channelname)
-    print(channels)
+    print("socket channel list: " + str(channels))
     emit("channel updated", channels, broadcast=True)
+
+
+#working on this part
+@socketio.on("switch channel")
+def switchChannel(data):
+    session.pop('channel', None)
+    channelname = data["channelname"]
+    print("get switch channel name: " + str(channelname))
+    session['channel'] = channelname
+    print("session: " + str(session['channel']))
+    emit("channel switched", channelname, broadcast=True)
 
 
 @socketio.on("delete channel")
 def deleteChannel(data):
     channelname = data["channelname"]
-    print(channelname)
+    print("delete channel socket: " + str(channelname))
     channels.remove(channelname)
-    print(channels)
+    print("delete channel list socket: " + channels)
+    #this part not using
     emit("channel deleted", channels, broadcast=True)
 
 
