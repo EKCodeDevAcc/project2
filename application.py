@@ -35,26 +35,24 @@ def index():
 
     print("/ channelname: " + str(channelname))
 
+    global chats
+
     keyVal = [channelname]
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     numChoosen = len(choosenChats)
-
-    if numChoosen > 0:
-        print("choosenChats: " + str(choosenChats[0]["time"]))
-        print("numChoosen: " + str(numChoosen))
-
-    # if numChoosen > 5:
-    #     for idx, val in enumerate(choosenChats):
-    # print(idx, val)
-
 
     if numChoosen > 5:
         for i in range(numChoosen-5):
             # choosenChats.remove(choosenChats[i]["time"])
             choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
-            # chats = [d for d in chats if d['time'] != choosenChats[i]["time"]]
+            chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
             print("for loop choosen: " + str(choosenChats))
 
+    print(len(chats))
+
+    # if numChoosen > 5:
+    #     for idx, val in enumerate(choosenChats):
+    # print(idx, val)
 
     if username:
         login_status = "Yes"
@@ -139,26 +137,13 @@ def deleteChannel(data):
 def chat(data):
 
     channelname = session.get('channel')
-    print(channelname)
-
     username = session.get('user')
-    print(username)
-
     chatname = data["chat"]
-    print(chatname)
-
     chattime = datetime.datetime.now()
-    print(chattime)
 
     jsChat = "{\"channel\": \"" + channelname + "\", \"user\": \"" + username + "\", \"message\": \"" + chatname + "\", \"time\": \"" + str(chattime) + "\"}"
-    #print(addChat)
-
     dictChat = dict(channel=channelname, user=username, message=chatname, time=str(chattime))
-
-    chats.append(dictChat);
-
-    #print(chats[0].channel)
-
+    chats.append(dictChat)
     emit("chat updated", jsChat, broadcast=True)
 
     # addChat = newChat('Testing', username, chatname, chattime)
