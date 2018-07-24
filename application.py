@@ -37,6 +37,8 @@ def index():
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     numChoosen = len(choosenChats)
 
+    print(users)
+
     if numChoosen > 5:
         for i in range(numChoosen-5):
             # choosenChats.remove(choosenChats[i]["time"])
@@ -56,17 +58,26 @@ def index():
 @app.route("/login", methods=['GET'])
 def login():
     username = request.args.get("username")
-    users.append(username)
-    session['user'] = username
-    login_status = "Yes"
-    login_error = "No"
-    data = dict(username=username, login_status=login_status, login_error=login_error)
-    return jsonify(data)
+    if username in users:
+        username = ""
+        login_status = "No"
+        login_error = "Yes"
+        data = dict(username=username, login_status=login_status, login_error=login_error)
+        return jsonify(data)
+    else:
+        users.append(username)
+        session['user'] = username
+        login_status = "Yes"
+        login_error = "No"
+        data = dict(username=username, login_status=login_status, login_error=login_error)
+        return jsonify(data)
 
 
 #Logout user and redirect to '/' which in this case, login page.
-@app.route("/logout")
+@app.route("/logout", methods=['GET'])
 def logout():
+    username = request.args.get("username")
+    # users.remove(username)
     session.pop('user', None)
     login_status = "No"
     login_error = "No"

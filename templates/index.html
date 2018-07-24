@@ -150,30 +150,21 @@
                     data: {username: username},
                     success: function(data){
                         loginAndLogout(data.login_status);
+                        if (data.login_status == "No"){
+                            alert("Choosen username already exist.");
+                        }
                         document.querySelector("#current_username").innerHTML = data.username;
                         console.log("getJSON: " + data.username);
                     }
                 });
             });
-        });
 
-        $(document).ready(function() {
-            $("#login").click(function() {
+            $("#logout").click(function() {
                 var username = document.querySelector("#input_username").value;
 
                     $.getJSON({
-                    url: "/login",
-                    data: {username: username},
-                    success: function(data){
-                        loginAndLogout(data.login_status);
-                        document.querySelector("#current_username").innerHTML = data.username;
-                    }
-                });
-            });
-
-            $("#logout").click(function() {
-                    $.getJSON({
                     url: "/logout",
+                    data: {username: username},
                     success: function(data){
                         loginAndLogout(data.login_status);
                         document.querySelector("#current_username").innerHTML = data.username;
