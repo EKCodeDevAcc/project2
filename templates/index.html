@@ -8,6 +8,7 @@
         <script>
         document.addEventListener('DOMContentLoaded', () => {
 
+            // Check whether a user is logged in or not and display contents depends on login status.
             loginAndLogout();
 
             // Connect to websocket
@@ -16,13 +17,13 @@
             // When connected, configure buttons
             socket.on('connect', () => {
 
-                // Add new channel
+                // Get input channl name and try to add new channel.
                 document.querySelector('#channel_submit').onclick = () => {
                     const channelname = document.querySelector('#channelname').value;
                     socket.emit('update channel', {'channelname': channelname});
                 }
 
-                // Add new chat
+                // Get input chat and send it with current channel name.
                 document.querySelector('#chat_submit').onclick = () => {
                     const chat = document.querySelector('#message').value;
                     const channel = document.querySelector('#current_channelname').innerHTML;
@@ -33,9 +34,10 @@
 
             // Create new elements for new channel in channel list
             socket.on('channel updated', data => {
+                // Get the length of channel list
                 const channelLength = Object.keys(data).length;
 
-                // Create new channel.
+                // Create new channel div.
                 const newDiv = document.createElement('div');
                 newDiv.className = 'channel';
                 newDiv.value = data[channelLength-1];
@@ -57,46 +59,59 @@
 
                 // Create remove button.
                 const newRemove = document.createElement('button');
+                newRemove.setAttribute('id', data[channelLength-1]);
                 newRemove.className = 'btn btn-outline-danger';
                 newRemove.setAttribute('onclick', 'removeOld(\'' + data[channelLength-1] + '\', this.parentNode)');
                 newRemove.innerHTML = 'Remove';
                 newRemove.style = 'float:right;';
                 newDiv.append(newRemove);
 
-                remove.onclick = function() {
-                    this.parentElement.remove();
+                // Function for newly created remove button.
+                newRemove.onclick = function() {
+
+                    //Get channel name to delete.
                     const channelname = this.parentElement.value;
                     socket.emit('delete channel', {'channelname': channelname});
                 }
 
-                // Add post to DOM.
+                // Add newDiv to channel list div.
                 document.querySelector('#channel_list').append(newDiv);
-
-                const allChats = document.querySelector('#all_chats');
-                allChats.scrollTop = allChats.scrollHeight;
             });
 
 
-            // Create new elements for new channel in channel list
+            // This happens when entered channel already exist.
             socket.on('channel exist', data => {
 
+                // Error message.
                 const msg = data.split("/")[0];
+
+                // Username who requested duplicate channel name.
                 const user = data.split("/")[1];
                 const current_username = document.querySelector('#current_username').innerHTML;
 
+                // Check if the given username and this username matches, if it does, pop out alert box.
                 if (user == current_username){
                     alert(msg);
                 }
             });
 
 
-            // When a new vote is announced, increase the count
+            // Remove all elements belong to and try to delete channel name from the list.
+            socket.on('channel deleted', data => {
+                const removeElement = document.getElementById(data)
+                removeElement.parentElement.remove();
+            });
+
+
+            // Get new chat.
             socket.on('chat updated', data => {
 
+                // Get currently chosen channel
                 var channel_status = document.querySelector('#current_channelname').innerHTML;
 
                 const info = JSON.parse(data);
 
+                // If channel name of the new chat matches with current channel, create new elements.
                 if (info.channel == channel_status){
 
                     const selected_time = document.createElement('div');
@@ -121,7 +136,8 @@
             });
 
 
-            //Enter keys for each buttons
+            // Enable to hit enter keys for each buttons.
+            // Username input and login button.
             var login_input = document.querySelector("#input_username");
             login_input.addEventListener("keyup", function(event) {
                event.preventDefault();
@@ -130,6 +146,7 @@
                };
             });
 
+            // Channelname input and create button.
             var channel_input = document.querySelector("#channelname");
             channel_input.addEventListener("keyup", function(event) {
                event.preventDefault();
@@ -138,6 +155,7 @@
                };
             });
 
+            // Chat input and send button.
             var message_input = document.querySelector("#message");
             message_input.addEventListener("keyup", function(event) {
                event.preventDefault();
@@ -147,27 +165,38 @@
             });
         });
 
+        // When login button clicked.
         $(document).ready(function() {
             $("#login").click(function() {
                 var username = document.querySelector("#input_username").value;
 
-                $.getJSON({
-                    url: "/login",
-                    data: {
-                        username: username
-                    },
-                    success: function(data){
-                        loginAndLogout(data.login_status);
-                        if (data.login_status == "No"){
-                            alert("Choosen username already exist.");
+                // If there is no username, alert it.
+                // Or send username and get result.
+                if (username == ""){
+                    alert("Please enter username to login!");
+                } else {
+                    $.getJSON({
+                        url: "/login",
+                        data: {
+                            username: username
+                        },
+                        success: function(data){
+                            loginAndLogout(data.login_status);
+
+                            // If entered username already exist, alert it.
+                            // Or update current username.
+                            if (data.login_status == "No"){
+                                alert("Choosen username already exist.");
+                            }
+                            document.querySelector("#current_username").innerHTML = data.username;
                         }
-                        document.querySelector("#current_username").innerHTML = data.username;
-                    }
-                });
+                    });
+                }
             });
 
+            // Get current username and logout user, update login status.
             $("#logout").click(function() {
-                var username = document.querySelector("#input_username").value;
+                var username = document.querySelector("#current_username").value;
 
                 $.getJSON({
                     url: "/logout",
@@ -183,14 +212,17 @@
             });
         });
 
+        //check if current user is logged in or not, if logged in, hide login content, display logout content.
+        //If the user is not logged in, display login content and hide logout content.
         function loginAndLogout(data) {
-            //check if current user is logged in or not, if logged in, hide login content, display logout content
-            //If the user is not logged in, display login content and hide logout content
             if (data != null){
                 var login_status = data;
             } else {
                 var login_status = document.querySelector('#login_status').innerHTML;
             }
+
+            // If user logged in, display every contents but login box.
+            // If not, display only login box, hide all other contents (logout box, channel list, chat list).
             if (login_status == 'Yes') {
                 document.querySelector('#login_form').style.visibility = "hidden";
                 document.querySelector('#logout_form').style.visibility = "visible";
@@ -204,6 +236,7 @@
             };
         };
 
+        // Change current selected channel.
         function selectChannel(channel){
             $.getJSON({
                 url: "/channelSelect",
@@ -214,13 +247,14 @@
                 success: function(data){
                     document.querySelector("#current_channelname").innerHTML = data.channelname;
 
+                    // Remove all chats belonged to previous channel.
                     var oldChats = document.querySelector('#old_chats');
                     oldChats.parentNode.removeChild(oldChats);
                     var newChats = document.querySelector('#new_chats');
                     newChats.parentNode.removeChild(newChats);
 
-                    if (!$('#hello').length) {
-                        // Create form
+                    // Create div for existing chats, or new chats.
+                    if (!$('#old_chats').length) {
                         const oldChats = document.createElement('div');
                         oldChats.setAttribute('id', 'old_chats');
 
@@ -231,6 +265,7 @@
                         document.querySelector('#all_chats').append(newChats);
                     }
 
+                    // For the number of chats, create new elements for chats belong to new channel.
                     var i = 0;
                     for (i; i<data.channellength; i++){
                         const selected_time = document.createElement('div');
@@ -256,12 +291,17 @@
             });
         };
 
-        //Data is name of channel, and element is parent element
+        //Data is name of channel, and element is parent element.
         function removeOld(data, element){
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
             element.remove();
             socket.emit('delete channel', {'channelname': data});
         };
+
+        // Allows only alphabets and numbers for input of username and channelname
+        function onlyAtoZandNum(data) {
+            data.value = data.value.split(/[^a-zA-Z0-9 ]/).join('');
+        }
         </script>
         <title>Ed Kang's Chat</title>
     </head>
@@ -269,15 +309,17 @@
         <div class="container">
             <h1 id="title_center"><a href="/">Edward Kang's Project 2!</a></h1>
             <div class="menu">
+
+                <!-- Login content box -->
                 <div id="login_form" class="menu_content">
-                    <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
-                        <input type="text" id="input_username" name="username" placeholder="username" maxlength="12">
+                        <input type="text" id="input_username" name="username" placeholder="username" maxlength="12" onkeyup="onlyAtoZandNum(this)">
                         <button id="login" class="btn btn-primary">Login</button>
                     </div>
                 </div>
+
+                <!-- this activate logout function which allows users to logout -->
                 <div id="logout_form" class="menu_content">
-                    <!-- this activate logout function which allows users to logout -->
                     <div class="content_item">
                         <button id="logout" class="btn btn-primary">Logout</button>
                     </div>
@@ -287,34 +329,43 @@
                         <h2 class="head_block">Welcome, <p id="current_username" class="current_data">{{ username }}</p></h2>
                     </div>
                 </div>
+
+                <!-- Save current login status and if there is any error -->
                 <p id="login_status" style="display: none;">{{ login_status }}</p>
                 <p id="login_error" style="display: none;">{{ login_error }}</p>
             </div>
             <hr>
             <div id="channel_box">
+
+                <!-- New channel name input and create button -->
                 <div id="channel_form">
-                    <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
-                        <input type="text" id="channelname" name="channelname" placeholder="channel name" maxlength="12">
+                        <input type="text" id="channelname" name="channelname" placeholder="channel name" maxlength="12" onkeyup="onlyAtoZandNum(this)">
                         <button id="channel_submit" class="btn btn-success">Create</button>
                     </div>
                 </div>
+
+                <!-- Display the list of channel list -->
                 <div id="channel_list">
                     {% for channel in channels %}
                     <div class="channel">
                         <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
                         <button class="btn btn-link" onclick="selectChannel(`{{ channel }}`, this.parentNode)">{{ channel }}</button>
-                        <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
+                        <button id="{{ channel }}" class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
                     </div>
                     {% endfor %}
                 </div>
             </div>
             <div id="chat_box">
+
+                <!-- Display current channel name, chat input textbox and send button -->
                 <h2 class="head_block">Current Channel: <p id="current_channelname" class="current_data">{{ channelname }}</p></h2>
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message" placeholder="message" maxlength="40">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
                 </div>
+
+                <!-- Display all chats belong to the channel, includes old chats and new chats -->
                 <div id="all_chats">
                     <div id="old_chats">
                         {% for chat in choosenChats %}
@@ -327,9 +378,6 @@
 
                     </div>
                 </div>
-            </div>
-            <div style="display: none;">
-                <button id="remove"></button>
             </div>
         </div>
     </body>

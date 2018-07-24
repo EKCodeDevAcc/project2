@@ -30,24 +30,27 @@ Personal Touch
 - After user input username, channelname, or messages, they can just hit enter key to submit instead of click buttons with mouse.
 - Depends on login status, display login box only, or display logout box, lists of channels and chats.
 - Display currently selected channel name.
+- Limit length of textbox input.
 
 style.css
 - It is css file for basic design of this website.
 
+
+
 Milestone 1
-- Users should be prompted to type in a display name. :fa-check-square:
-- When users returns to your app later, the display name should still be remembered. :fa-check-square:
-- Any user should be able to create a new channel, so long as its name doesn’t conflict with the name of an existing channel. :fa-check-square:
-- Users should be able to see a list of all current channels. :fa-check-square:
-- selecting one should allow the user to view the channel. :fa-check-square:
+- Users should be prompted to type in a display name. (YES)
+- When users returns to your app later, the display name should still be remembered. (YES)
+- Any user should be able to create a new channel, so long as its name doesn’t conflict with the name of an existing channel. (YES)
+- Users should be able to see a list of all current channels. (YES)
+- selecting one should allow the user to view the channel. (YES)
 
 Milestone 2
-- The user should see any messages that have already been sent in that channel, up to a maximum of 100 messages. :fa-check-square:
-- Your app should only store the 100 most recent messages per channel in server-side memory. :fa-check-square:
-- Once in a channel, users should be able to send text messages to others the channel. :fa-check-square:
-- When a user sends a message, their display name and the timestamp of the message should be associated with the message. :fa-check-square:
-- All users in the channel should then see the new message appear on their channel page. :fa-check-square:
-- Sending and receiving messages should NOT require reloading the page. :fa-check-square:
+- The user should see any messages that have already been sent in that channel, up to a maximum of 100 messages. (YES)
+- Your app should only store the 100 most recent messages per channel in server-side memory. (YES)
+- Once in a channel, users should be able to send text messages to others the channel. (YES)
+- When a user sends a message, their display name and the timestamp of the message should be associated with the message. (YES)
+- All users in the channel should then see the new message appear on their channel page. (YES)
+- Sending and receiving messages should NOT require reloading the page. (YES)
 
 Milestone 3
-- Your application should remember what channel the user was on previously and take the user back to that channel. :fa-check-square:
+- Your application should remember what channel the user was on previously and take the user back to that channel. (YES)
