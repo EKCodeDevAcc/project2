@@ -86,12 +86,8 @@ def logout():
 @app.route("/channelSelect", methods=['GET'])
 def channelSelectPost():
     session.pop('channel', None)
-    print("pop out")
-    # print(session['channel'])
     channelname = request.args.get("channelname")
     session['channel'] = channelname
-    print("channelSelect")
-    print(channelname)
 
     global chats
 
@@ -112,8 +108,14 @@ def channelSelectPost():
 @socketio.on("update channel")
 def channel(data):
     channelname = data["channelname"]
-    channels.append(channelname)
-    emit("channel updated", channels, broadcast=True)
+    if channelname in channels:
+        error_message = "Channel already exist"
+        username = session.get('user')
+        send_data = str(error_message) + "/" + str(username)
+        emit("channel exist", send_data, broadcast=True)
+    else:
+        channels.append(channelname)
+        emit("channel updated", channels, broadcast=True)
 
 
 

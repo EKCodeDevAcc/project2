@@ -39,16 +39,10 @@
             socket.on('channel updated', data => {
                 const channelLength = Object.keys(data).length;
 
-                // Create form
-                const newForm = document.createElement('form');
-                newForm.action = '/channelSelect';
-                newForm.method = 'post';
-
                 // Create new channel.
                 const newDiv = document.createElement('div');
                 newDiv.className = 'channel';
                 newDiv.value = data[channelLength-1];
-                newForm.append(newDiv);
 
                 // Create hidden input.
                 const hiddenInput = document.createElement('input');
@@ -61,6 +55,7 @@
                 // Create submit button.
                 const newSubmit = document.createElement('button');
                 newSubmit.className = 'btn btn-link';
+                newSubmit.setAttribute('onclick', 'selectChannel(\'' + data[channelLength-1] + '\', this.parentNode)');
                 newSubmit.innerHTML = data[channelLength-1];
                 newDiv.append(newSubmit);
 
@@ -79,7 +74,24 @@
                 }
 
                 // Add post to DOM.
-                document.querySelector('#channel_list').append(newForm);
+                document.querySelector('#channel_list').append(newDiv);
+            });
+
+
+            // Create new elements for new channel in channel list
+            socket.on('channel exist', data => {
+
+                const msg = data.split("/")[0];
+                const user = data.split("/")[1];
+                const current_username = document.querySelector('#current_username').innerHTML;
+
+                console.log(msg);
+                console.log(user);
+                console.log(current_username);
+
+                if (user == current_username){
+                    alert(msg);
+                }
             });
 
 
@@ -128,7 +140,6 @@
                     url: "/login",
                     data: {
                         username: username
-
                     },
                     success: function(data){
                         loginAndLogout(data.login_status);
@@ -275,17 +286,11 @@
                 </div>
                 <div id="channel_list">
                     {% for channel in channels %}
-                    <!--
-                    <form action="{{ url_for('channelSelectPost') }}" method="post">
-                    -->
-                        <div class="channel">
-                            <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
-                            <button class="btn btn-link" onclick="selectChannel(`{{ channel }}`, this.parentNode)">{{ channel }}</button>
-                            <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
-                        </div>
-                    <!--
-                    </form>
-                    -->
+                    <div class="channel">
+                        <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
+                        <button class="btn btn-link" onclick="selectChannel(`{{ channel }}`, this.parentNode)">{{ channel }}</button>
+                        <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
+                    </div>
                     {% endfor %}
                 </div>
             </div>
