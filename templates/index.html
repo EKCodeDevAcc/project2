@@ -2,21 +2,32 @@
 <html>
     <head>
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
-        <script src="{{ url_for('static', filename='index.js') }}"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
+        <script src="{{ url_for('static', filename='index.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <script>
+
+            // if (typeof(Storage) !== "undefined") {
+            //     // Store
+            //     localStorage.setItem("username", "Smith");
+            //     // Retrieve
+            //     document.getElementById("result").innerHTML = localStorage.getItem("lastname");
+            // } else {
+            //     document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
+            // }
+
         document.addEventListener('DOMContentLoaded', () => {
 
-            /*if (typeof(Storage) !== "undefined") {
-                // Store
-                localStorage.setItem("last_channel", "Smith");
-                // Retrieve
-                //document.getElementById("result").innerHTML = localStorage.getItem("lastname");
-            } else {
-                //document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
-            }
-*/
+            loginAndLogout();
+
+                // console.log("login clicked: " + username);
+
+                // const request = new XMLHttpRequest();
+                // request.open('GET', '/loginPost');
+                // request.onload = () => {
+                //     const data = JSON.parse(request.responseText);
+                //     console.log(data);
 
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -127,9 +138,58 @@
             });
 
 
+
+        });
+
+        $(document).ready(function() {
+            $("#login").click(function() {
+                var username = document.querySelector("#input_username").value;
+
+                    $.getJSON({
+                    url: "/login",
+                    data: {username: username},
+                    success: function(data){
+                        loginAndLogout(data.login_status);
+                        document.querySelector("#current_username").innerHTML = data.username;
+                        console.log("getJSON: " + data.username);
+                    }
+                });
+            });
+        });
+
+        $(document).ready(function() {
+            $("#login").click(function() {
+                var username = document.querySelector("#input_username").value;
+
+                    $.getJSON({
+                    url: "/login",
+                    data: {username: username},
+                    success: function(data){
+                        loginAndLogout(data.login_status);
+                        document.querySelector("#current_username").innerHTML = data.username;
+                    }
+                });
+            });
+
+            $("#logout").click(function() {
+                    $.getJSON({
+                    url: "/logout",
+                    success: function(data){
+                        loginAndLogout(data.login_status);
+                        document.querySelector("#current_username").innerHTML = data.username;
+                    }
+                });
+            });
+        });
+
+        function loginAndLogout(data) {
             //check if current user is logged in or not, if logged in, hide login content, display logout content
             //If the user is not logged in, display login content and hide logout content
-            var login_status = document.querySelector('#login_status').innerHTML;
+            if (data != null){
+                var login_status = data;
+            } else {
+                var login_status = document.querySelector('#login_status').innerHTML;
+            }
             if (login_status == 'Yes') {
                 document.querySelector('#login_form').style.visibility = "hidden";
                 document.querySelector('#logout_form').style.visibility = "visible";
@@ -137,7 +197,7 @@
                 document.querySelector('#login_form').style.visibility = "visible";
                 document.querySelector('#logout_form').style.visibility = "hidden";
             };
-        });
+        }
 
         /*function switchChannel(data){
             console.log("switch Clicked!");
@@ -153,7 +213,7 @@
             socket.emit('delete channel', {'channelname': data});
         };
         </script>
-        <title>Vote</title>
+        <title>Ed Kang's Chat</title>
     </head>
     <body>
         <div class="container">
@@ -161,24 +221,26 @@
             <div class="parent">
                 <div id="login_form" class="child1">
                     <!-- Subtitle of main page -->
-                    <form action="{{ url_for('loginPost') }}" method="post">
-                        <div id="subtitle_center2" class="form-group">
-                            <input type="text" name="username" placeholder="username">
-                            <button class="btn btn-primary">Login</button>
-                        </div>
+                    <!--
+                    <form action="{{ url_for('login') }}" method="post">
+                    -->
+                    <div id="subtitle_center2" class="form-group">
+                        <input type="text" id="input_username" name="username" placeholder="username">
+                        <button id="login" class="btn btn-primary">Login</button>
+                    </div>
+                    <!--
                     </form>
+                    -->
                 </div>
                 <div id="logout_form" class="child1">
                     <!-- this activate logout function which allows users to logout -->
                     <div class="child2">
-                        <form action="{{ url_for('logout') }}">
-                            <button id="logout_button" class="btn btn-primary">Logout</button>
-                        </form>
+                        <button id="logout" class="btn btn-primary">Logout</button>
                     </div>
 
                     <!-- this section display who current logged in user is -->
                     <div class="child2">
-                        <h2 id="logout_block">Welcome, {{ username }}</h2>
+                        <h2 id="logout_block">Welcome, <p id="current_username">{{ username }}</p></h2>
                     </div>
                 </div>
                 <p id="login_status" style="display: none;">{{ login_status }}</p>

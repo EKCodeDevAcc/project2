@@ -26,14 +26,10 @@ choosenChats = []
 # list of usernames
 users = []
 
-votes = ["what"]
-
 @app.route("/")
 def index():
     username = session.get('user')
     channelname = session.get('channel')
-
-    print("/ channelname: " + str(channelname))
 
     global chats
 
@@ -46,41 +42,36 @@ def index():
             # choosenChats.remove(choosenChats[i]["time"])
             choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
             chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
-            print("for loop choosen: " + str(choosenChats))
-
-    print(len(chats))
-
-    # if numChoosen > 5:
-    #     for idx, val in enumerate(choosenChats):
-    # print(idx, val)
 
     if username:
         login_status = "Yes"
         return render_template("index.html", username=username, login_status=login_status, channels=channels, choosenChats=choosenChats, channelname=channelname)
     else:
-        username = "blank"
+        username = ""
         login_status = "No"
         return render_template("index.html", username=username, login_status=login_status, channels=channels, choosenChats=choosenChats, channelname=channelname)
 
 
-#Get input value from login.html and check if given username/password exist in db.
-@app.route("/loginPost", methods=['POST'])
-def loginPost():
-    username = request.form.get("username")
+#Get input value from login.html and check if given username/password exist
+@app.route("/login", methods=['GET'])
+def login():
+    username = request.args.get("username")
     users.append(username)
     session['user'] = username
     login_status = "Yes"
     login_error = "No"
-    print("list of users (2): " + str(users))
-    print("login status: " + login_status)
-    return redirect(url_for('index', username=username, login_status=login_status, channels=channels))
+    data = dict(username=username, login_status=login_status, login_error=login_error)
+    return jsonify(data)
 
 
 #Logout user and redirect to '/' which in this case, login page.
 @app.route("/logout")
 def logout():
     session.pop('user', None)
-    return redirect('/')
+    login_status = "No"
+    login_error = "No"
+    data = dict(username="", login_status=login_status, login_error=login_error)
+    return jsonify(data)
 
 
 #Get input value from login.html and check if given username/password exist in db.
