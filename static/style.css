@@ -36,7 +36,7 @@
 }
 
 /* subtitle area which includes subtitle, welcome comment, and logout button */
-.parent {
+.menu {
     background-color: #7ea0ff;
     border-radius: 15px;
     margin-top: 30px;
@@ -45,14 +45,14 @@
 }
 
 /* child of parent1 to put subtitle and right side next to each other */
-.child1 {
+.menu_content {
     margin: auto;
     width: 50%;
     float: left;
 }
 
 /* child of child1 to put welcome, user and logout button next to each other */
-.child2 {
+.content_item {
     float: right;
 }
 

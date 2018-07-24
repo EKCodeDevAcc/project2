@@ -129,7 +129,30 @@
             });
 
 
+            //Enter keys for each buttons
+            var login_input = document.querySelector("#input_username");
+            login_input.addEventListener("keyup", function(event) {
+               event.preventDefault();
+               if (event.keyCode === 13) {
+                   document.querySelector("#login").click();
+               };
+            });
 
+            var channel_input = document.querySelector("#channelname");
+            channel_input.addEventListener("keyup", function(event) {
+               event.preventDefault();
+               if (event.keyCode === 13) {
+                   document.querySelector("#channel_submit").click();
+               };
+            });
+
+            var message_input = document.querySelector("#message");
+            message_input.addEventListener("keyup", function(event) {
+               event.preventDefault();
+               if (event.keyCode === 13) {
+                   document.querySelector("#chat_submit").click();
+               };
+            });
         });
 
         $(document).ready(function() {
@@ -253,22 +276,22 @@
     <body>
         <div class="container">
             <h1 id="title_center"><a href="/">Edward Kang's Project 2!</a></h1>
-            <div class="parent">
-                <div id="login_form" class="child1">
+            <div class="menu">
+                <div id="login_form" class="menu_content">
                     <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
                         <input type="text" id="input_username" name="username" placeholder="username">
                         <button id="login" class="btn btn-primary">Login</button>
                     </div>
                 </div>
-                <div id="logout_form" class="child1">
+                <div id="logout_form" class="menu_content">
                     <!-- this activate logout function which allows users to logout -->
-                    <div class="child2">
+                    <div class="content_item">
                         <button id="logout" class="btn btn-primary">Logout</button>
                     </div>
 
                     <!-- this section display who current logged in user is -->
-                    <div class="child2">
+                    <div class="content_item">
                         <h2 class="head_block">Welcome, <p id="current_username" class="current_data">{{ username }}</p></h2>
                     </div>
                 </div>
@@ -280,7 +303,7 @@
                 <div id="channel_form">
                     <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
-                        <input type="text" id="channelname" name="channelname" placeholder="channelname">
+                        <input type="text" id="channelname" name="channelname" placeholder="channel name">
                         <button id="channel_submit" class="btn btn-success">Create</button>
                     </div>
                 </div>
@@ -297,7 +320,7 @@
             <div id="chat_box">
                 <h2 class="head_block">Current Channel: <p id="current_channelname" class="current_data">{{ channelname }}</p></h2>
                 <div id="subtitle_center2" class="form-group">
-                    <input type="text" id="message">
+                    <input type="text" id="message" placeholder="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
                 </div>
                 <div id="all_chats">
