@@ -7,27 +7,9 @@
         <script src="{{ url_for('static', filename='index.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <script>
-
-            // if (typeof(Storage) !== "undefined") {
-            //     // Store
-            //     localStorage.setItem("username", "Smith");
-            //     // Retrieve
-            //     document.getElementById("result").innerHTML = localStorage.getItem("lastname");
-            // } else {
-            //     document.getElementById("result").innerHTML = "Sorry, your browser does not support Web Storage...";
-            // }
-
         document.addEventListener('DOMContentLoaded', () => {
 
             loginAndLogout();
-
-                // console.log("login clicked: " + username);
-
-                // const request = new XMLHttpRequest();
-                // request.open('GET', '/loginPost');
-                // request.onload = () => {
-                //     const data = JSON.parse(request.responseText);
-                //     console.log(data);
 
             // Connect to websocket
             var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
@@ -35,29 +17,31 @@
             // When connected, configure buttons
             socket.on('connect', () => {
 
-                // Each button should emit a "submit vote" event
+                // Add new channel
                 document.querySelector('#channel_submit').onclick = () => {
                     const channelname = document.querySelector('#channelname').value;
                     console.log(channelname);
                     socket.emit('update channel', {'channelname': channelname});
                 }
 
-                // Each button should emit a "submit vote" event
+                // Add new chat
                 document.querySelector('#chat_submit').onclick = () => {
                     const chat = document.querySelector('#message').value;
-                    console.log(chat);
-                    socket.emit('update chat', {'chat': chat});
+                    const channel = document.querySelector('#current_channelname').innerHTML;
+                    //const data = chat + "/" + channel
+                    console.log(channel);
+                    socket.emit('update chat', {'chat': chat, 'channel': channel});
                 }
             });
 
 
-            // When a new vote is announced, increase the count
+            // Create new elements for new channel in channel list
             socket.on('channel updated', data => {
                 const channelLength = Object.keys(data).length;
 
                 // Create form
                 const newForm = document.createElement('form');
-                newForm.action = '/channelSelectPost'
+                newForm.action = '/channelSelect';
                 newForm.method = 'post';
 
                 // Create new channel.
@@ -87,6 +71,7 @@
                 newRemove.innerHTML = 'Remove';
                 newRemove.style = 'float:right;';
                 newDiv.append(newRemove);
+
                 remove.onclick = function() {
                     this.parentElement.remove();
                     const channelname = this.parentElement.value;
@@ -98,23 +83,17 @@
             });
 
 
-            // When select new channel, change channel session
-            /*socket.on('channel switched', data => {
-                document.querySelector('#current_channel_title').innerHTML = data;
-                document.querySelector('#current_channel').innerHTML = data;
-                console.log("here here " + data);
-            });*/
-
-
             // When a new vote is announced, increase the count
             socket.on('chat updated', data => {
 
-                var login_status = document.querySelector('#current_channel').innerHTML;
-                console.log("current: " + login_status);
+                var channel_status = document.querySelector('#current_channelname').innerHTML;
 
                 const info = JSON.parse(data);
 
-                if (info.channel == login_status){
+                console.log("current: " + channel_status);
+                console.log("get: " + info.channel);
+
+                if (info.channel == channel_status){
 
                     const selected_time = document.createElement('div');
                     selected_time.className = 'selected_time';
@@ -131,9 +110,9 @@
                     selected_message.value = info.message;
                     selected_message.innerHTML = info.message;
 
-                    document.querySelector('#chat_list').append(selected_time);
-                    document.querySelector('#chat_list').append(selected_user);
-                    document.querySelector('#chat_list').append(selected_message);
+                    document.querySelector('#new_chats').append(selected_time);
+                    document.querySelector('#new_chats').append(selected_user);
+                    document.querySelector('#new_chats').append(selected_message);
                 }
             });
 
@@ -145,9 +124,12 @@
             $("#login").click(function() {
                 var username = document.querySelector("#input_username").value;
 
-                    $.getJSON({
+                $.getJSON({
                     url: "/login",
-                    data: {username: username},
+                    data: {
+                        username: username
+
+                    },
                     success: function(data){
                         loginAndLogout(data.login_status);
                         if (data.login_status == "No"){
@@ -162,9 +144,12 @@
             $("#logout").click(function() {
                 var username = document.querySelector("#input_username").value;
 
-                    $.getJSON({
+                $.getJSON({
                     url: "/logout",
-                    data: {username: username},
+                    data: {
+                        username: username
+
+                    },
                     success: function(data){
                         loginAndLogout(data.login_status);
                         document.querySelector("#current_username").innerHTML = data.username;
@@ -188,14 +173,62 @@
                 document.querySelector('#login_form').style.visibility = "visible";
                 document.querySelector('#logout_form').style.visibility = "hidden";
             };
-        }
+        };
 
-        /*function switchChannel(data){
-            console.log("switch Clicked!");
-            console.log(data);
-            var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-            socket.emit('switch channel', {'channelname': data});
-        }*/
+        function selectChannel(channel){
+
+            console.log("Channel: " + channel);
+
+            $.getJSON({
+                url: "/channelSelect",
+                data: {
+                    channelname: channel
+
+                },
+                success: function(data){
+                    document.querySelector("#current_channelname").innerHTML = data.channelname;
+
+                    var oldChats = document.querySelector('#old_chats');
+                    oldChats.parentNode.removeChild(oldChats);
+                    var newChats = document.querySelector('#new_chats');
+                    newChats.parentNode.removeChild(newChats);
+
+                    if (!$('#hello').length) {
+                        // Create form
+                        const oldChats = document.createElement('div');
+                        oldChats.setAttribute('id', 'old_chats');
+
+                        const newChats = document.createElement('div');
+                        newChats.setAttribute('id', 'new_chats');
+
+                        document.querySelector('#all_chats').append(oldChats);
+                        document.querySelector('#all_chats').append(newChats);
+                    }
+
+                    var i = 0;
+                    for (i; i<data.channellength; i++){
+                        const selected_time = document.createElement('div');
+                        selected_time.className = 'selected_time';
+                        selected_time.value = data.chats[i].time;
+                        selected_time.innerHTML = data.chats[i].time;
+
+                        const selected_user = document.createElement('div');
+                        selected_user.className = 'selected_user';
+                        selected_user.value = data.chats[i].user;
+                        selected_user.innerHTML = data.chats[i].user;
+
+                        const selected_message = document.createElement('div');
+                        selected_message.className = 'selected_message';
+                        selected_message.value = data.chats[i].message;
+                        selected_message.innerHTML = data.chats[i].message;
+
+                        document.querySelector('#new_chats').append(selected_time);
+                        document.querySelector('#new_chats').append(selected_user);
+                        document.querySelector('#new_chats').append(selected_message);
+                    };
+                }
+            });
+        };
 
         //Data is name of channel, and element is parent element
         function removeOld(data, element){
@@ -212,16 +245,10 @@
             <div class="parent">
                 <div id="login_form" class="child1">
                     <!-- Subtitle of main page -->
-                    <!--
-                    <form action="{{ url_for('login') }}" method="post">
-                    -->
                     <div id="subtitle_center2" class="form-group">
                         <input type="text" id="input_username" name="username" placeholder="username">
                         <button id="login" class="btn btn-primary">Login</button>
                     </div>
-                    <!--
-                    </form>
-                    -->
                 </div>
                 <div id="logout_form" class="child1">
                     <!-- this activate logout function which allows users to logout -->
@@ -231,12 +258,11 @@
 
                     <!-- this section display who current logged in user is -->
                     <div class="child2">
-                        <h2 id="logout_block">Welcome, <p id="current_username">{{ username }}</p></h2>
+                        <h2 class="head_block">Welcome, <p id="current_username" class="current_data">{{ username }}</p></h2>
                     </div>
                 </div>
                 <p id="login_status" style="display: none;">{{ login_status }}</p>
                 <p id="login_error" style="display: none;">{{ login_error }}</p>
-                <p id="current_channel" style="display: none;">{{ channelname }}</p>
             </div>
             <hr>
             <div id="channel_box">
@@ -249,29 +275,35 @@
                 </div>
                 <div id="channel_list">
                     {% for channel in channels %}
+                    <!--
                     <form action="{{ url_for('channelSelectPost') }}" method="post">
+                    -->
                         <div class="channel">
                             <input type="text" name="hiddenChannel" value="{{ channel }}" style="display:none;">
-                            <button class="btn btn-link">{{ channel }}</button>
+                            <button class="btn btn-link" onclick="selectChannel(`{{ channel }}`, this.parentNode)">{{ channel }}</button>
                             <button class="btn btn-outline-danger" onclick="removeOld(`{{ channel }}`, this.parentNode)" style="float:right;">Remove</button>
                         </div>
+                    <!--
                     </form>
+                    -->
                     {% endfor %}
                 </div>
             </div>
             <div id="chat_box">
-                <h2>Current Channel: {{ channelname }}</h2>
+                <h2 class="head_block">Current Channel: <p id="current_channelname" class="current_data">{{ channelname }}</p></h2>
                 <div id="subtitle_center2" class="form-group">
                     <input type="text" id="message">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
                 </div>
-                <div>
-                    {% for chat in choosenChats %}
-                    <div class="selected_time" value="{{ chat.time }}">{{ chat.time }}</div>
-                    <div class="selected_user" value="{{ chat.user }}">{{ chat.user }}</div>
-                    <div class="selected_message" value="{{ chat.message }}">{{ chat.message }}</div>
-                    {% endfor %}
-                    <div id="chat_list">
+                <div id="all_chats">
+                    <div id="old_chats">
+                        {% for chat in choosenChats %}
+                        <div class="selected_time" value="{{ chat.time }}">{{ chat.time }}</div>
+                        <div class="selected_user" value="{{ chat.user }}">{{ chat.user }}</div>
+                        <div class="selected_message" value="{{ chat.message }}">{{ chat.message }}</div>
+                        {% endfor %}
+                    </div>
+                    <div id="new_chats">
 
                     </div>
                 </div>

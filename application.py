@@ -37,11 +37,8 @@ def index():
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     numChoosen = len(choosenChats)
 
-    print(users)
-
     if numChoosen > 5:
         for i in range(numChoosen-5):
-            # choosenChats.remove(choosenChats[i]["time"])
             choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
             chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
 
@@ -86,59 +83,53 @@ def logout():
 
 
 #Get input value from login.html and check if given username/password exist in db.
-@app.route("/channelSelectPost", methods=['POST'])
+@app.route("/channelSelect", methods=['GET'])
 def channelSelectPost():
     session.pop('channel', None)
-    channelname = request.form.get("hiddenChannel")
-    #users.append(username)
+    print("pop out")
+    # print(session['channel'])
+    channelname = request.args.get("channelname")
     session['channel'] = channelname
-    print("post channelname: " + str(channelname))
-    print("post channel session: " + str(session['channel']))
-    login_status = "Yes"
-    login_error = "No"
-    username = session.get('user')
-    #print("list of users (2): " + str(users))
-    #print("login status: " + login_status)
-    return redirect(url_for('index', username=username, login_status=login_status, channels=channels, channelname=channelname))
+    print("channelSelect")
+    print(channelname)
+
+    global chats
+
+    keyVal = [channelname]
+    choosenChats = [d for d in chats if d['channel'] in keyVal]
+    numChoosen = len(choosenChats)
+
+    if numChoosen > 5:
+        for i in range(numChoosen-5):
+            choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
+            chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
+
+    data = dict(channelname=channelname, channellength=numChoosen, chats=choosenChats)
+    return jsonify(data)
 
 
 
 @socketio.on("update channel")
 def channel(data):
     channelname = data["channelname"]
-    print("socket: " + str(channelname))
     channels.append(channelname)
-    print("socket channel list: " + str(channels))
     emit("channel updated", channels, broadcast=True)
 
-
-#working on this part
-# @socketio.on("switch channel")
-# def switchChannel(data):
-#     session.pop('channel', None)
-#     channelname = data["channelname"]
-#     print("get switch channel name: " + str(channelname))
-
-#     session['channel'] = channelname
-
-#     print("session: " + str(session['channel']))
-#     emit("channel switched", channelname, broadcast=True)
 
 
 @socketio.on("delete channel")
 def deleteChannel(data):
     channelname = data["channelname"]
-    print("delete channel socket: " + str(channelname))
     channels.remove(channelname)
-    print("delete channel list socket: " + channels)
     #this part not using
     emit("channel deleted", channels, broadcast=True)
+
 
 
 @socketio.on("update chat")
 def chat(data):
 
-    channelname = session.get('channel')
+    channelname = data["channel"]
     username = session.get('user')
     chatname = data["chat"]
     chattime = datetime.datetime.now()
@@ -147,19 +138,3 @@ def chat(data):
     dictChat = dict(channel=channelname, user=username, message=chatname, time=str(chattime))
     chats.append(dictChat)
     emit("chat updated", jsChat, broadcast=True)
-
-    # addChat = newChat('Testing', username, chatname, chattime)
-
-    # chats.append(addChat)
-    # print(chats)
-    # print(chats[0].channel)
-    # print(chats[0].user)
-    # print(chats[0].message)
-    # print(chats[0].time)
-
-    #testJson = json.dumps(addChat)
-    # testJson = json.dumps(addChat, indent=4, sort_keys=True, default=str)
-    # print("1: " + testJson)
-    # print("2: " + testJson[0])
-
-    #emit("chat updated", testJson, broadcast=True)
