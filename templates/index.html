@@ -4,7 +4,6 @@
         <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.6/socket.io.min.js"></script>
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.0/jquery.min.js"></script>
-        <script src="{{ url_for('static', filename='index.js') }}"></script>
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <script>
         document.addEventListener('DOMContentLoaded', () => {
@@ -20,7 +19,6 @@
                 // Add new channel
                 document.querySelector('#channel_submit').onclick = () => {
                     const channelname = document.querySelector('#channelname').value;
-                    console.log(channelname);
                     socket.emit('update channel', {'channelname': channelname});
                 }
 
@@ -28,8 +26,6 @@
                 document.querySelector('#chat_submit').onclick = () => {
                     const chat = document.querySelector('#message').value;
                     const channel = document.querySelector('#current_channelname').innerHTML;
-                    //const data = chat + "/" + channel
-                    console.log(channel);
                     socket.emit('update chat', {'chat': chat, 'channel': channel});
                 }
             });
@@ -75,6 +71,9 @@
 
                 // Add post to DOM.
                 document.querySelector('#channel_list').append(newDiv);
+
+                const allChats = document.querySelector('#all_chats');
+                allChats.scrollTop = allChats.scrollHeight;
             });
 
 
@@ -84,10 +83,6 @@
                 const msg = data.split("/")[0];
                 const user = data.split("/")[1];
                 const current_username = document.querySelector('#current_username').innerHTML;
-
-                console.log(msg);
-                console.log(user);
-                console.log(current_username);
 
                 if (user == current_username){
                     alert(msg);
@@ -101,9 +96,6 @@
                 var channel_status = document.querySelector('#current_channelname').innerHTML;
 
                 const info = JSON.parse(data);
-
-                console.log("current: " + channel_status);
-                console.log("get: " + info.channel);
 
                 if (info.channel == channel_status){
 
@@ -170,7 +162,6 @@
                             alert("Choosen username already exist.");
                         }
                         document.querySelector("#current_username").innerHTML = data.username;
-                        console.log("getJSON: " + data.username);
                     }
                 });
             });
@@ -203,16 +194,17 @@
             if (login_status == 'Yes') {
                 document.querySelector('#login_form').style.visibility = "hidden";
                 document.querySelector('#logout_form').style.visibility = "visible";
+                document.querySelector('#channel_box').style.visibility = "visible";
+                document.querySelector('#chat_box').style.visibility = "visible";
             } else if (login_status == 'No') {
                 document.querySelector('#login_form').style.visibility = "visible";
                 document.querySelector('#logout_form').style.visibility = "hidden";
+                document.querySelector('#channel_box').style.visibility = "hidden";
+                document.querySelector('#chat_box').style.visibility = "hidden";
             };
         };
 
         function selectChannel(channel){
-
-            console.log("Channel: " + channel);
-
             $.getJSON({
                 url: "/channelSelect",
                 data: {
@@ -280,7 +272,7 @@
                 <div id="login_form" class="menu_content">
                     <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
-                        <input type="text" id="input_username" name="username" placeholder="username">
+                        <input type="text" id="input_username" name="username" placeholder="username" maxlength="12">
                         <button id="login" class="btn btn-primary">Login</button>
                     </div>
                 </div>
@@ -303,7 +295,7 @@
                 <div id="channel_form">
                     <!-- Subtitle of main page -->
                     <div id="subtitle_center2" class="form-group">
-                        <input type="text" id="channelname" name="channelname" placeholder="channel name">
+                        <input type="text" id="channelname" name="channelname" placeholder="channel name" maxlength="12">
                         <button id="channel_submit" class="btn btn-success">Create</button>
                     </div>
                 </div>
@@ -320,7 +312,7 @@
             <div id="chat_box">
                 <h2 class="head_block">Current Channel: <p id="current_channelname" class="current_data">{{ channelname }}</p></h2>
                 <div id="subtitle_center2" class="form-group">
-                    <input type="text" id="message" placeholder="message">
+                    <input type="text" id="message" placeholder="message" maxlength="40">
                     <button id="chat_submit" class="btn btn-primary">Send</button>
                 </div>
                 <div id="all_chats">

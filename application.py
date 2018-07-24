@@ -6,7 +6,6 @@ import json
 from flask import Flask, session, jsonify, render_template, request, redirect, url_for
 from flask_session import Session
 from flask_socketio import SocketIO, emit
-from chat import newChat
 
 app = Flask(__name__)
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -20,11 +19,17 @@ Session(app)
 # list of all channels
 channels = []
 
+# list of all chats
 chats = []
+
+# list of chats belong to certain channel
 choosenChats = []
 
 # list of usernames
 users = []
+
+# max number of chats
+maxChats = 3
 
 @app.route("/")
 def index():
@@ -37,8 +42,8 @@ def index():
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     numChoosen = len(choosenChats)
 
-    if numChoosen > 5:
-        for i in range(numChoosen-5):
+    if numChoosen > maxChats:
+        for i in range(numChoosen-maxChats):
             choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
             chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
 
@@ -95,8 +100,8 @@ def channelSelectPost():
     choosenChats = [d for d in chats if d['channel'] in keyVal]
     numChoosen = len(choosenChats)
 
-    if numChoosen > 5:
-        for i in range(numChoosen-5):
+    if numChoosen > maxChats:
+        for i in range(numChoosen-maxChats):
             choosenChats = [d for d in choosenChats if d['time'] != choosenChats[0]["time"]]
             chats = [d for d in chats if d['time'] != choosenChats[0]["time"]]
 

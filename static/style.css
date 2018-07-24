@@ -69,6 +69,11 @@
     float: right;
 }
 
+#channel_list, #all_chats {
+    overflow: auto;
+    height: 500px;
+}
+
 #old_chats, #new_chats {
     margin-left: 15px;
 }
